@@ -562,6 +562,9 @@ Bug fixes from the first days of 0.5.0, a Safari extension, and more file types.
 
 These ship in the next version.
 
+- ✅ A crawling connection at a download's end is replaced again after the disk set the pace, instead
+  of holding a last piece for a minute; the shared-line slow-connection test no longer fails on a busy
+  CI runner
 - ✅ Screen readers in the main window: Tab goes round the toolbar, the Categories tree and the
   download list, and the screen reader says and follows the download, category or toolbar button
   the keys are on; the toolbar is a toolbar of named buttons; the lists in MDM's windows say their
