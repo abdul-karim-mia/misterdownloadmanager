@@ -4275,6 +4275,9 @@ impl App {
             return;
         }
         ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+        // X11: out of the window list too, when it was minimized (#1255).
+        #[cfg(target_os = "linux")]
+        crate::unix::withdraw_main_window();
         self.hidden = true;
         self.start_trimming();
     }
@@ -4655,9 +4658,7 @@ impl App {
         };
         if minimize && !self.hidden {
             tracing::info!("minimized to the notification area");
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-            self.hidden = true;
-            self.start_trimming();
+            self.hide_to_tray(ctx);
         }
         // Hidden, the window gets no paint messages: keep the clock (queues, scheduler,
         // download limits) running.
