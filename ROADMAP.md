@@ -586,6 +586,9 @@ These ship in the next version.
   a tab or window title takes none (thanks to [@Seyamalam](https://github.com/Seyamalam))
 - ✅ Bangla: a web page is a **পেজ**, never a পৃষ্ঠা (a book's page) — "এই পেজে", "পেজটি",
   "পেজের ঠিকানা" — and a checksum a **চেকসাম** (thanks to [@Seyamalam](https://github.com/Seyamalam))
+- ✅ Bangla: termbase alignment — export is **এক্সপোর্ট**, import is **ইম্পোর্ট**, help is
+  **সহায়তা**, category is **শ্রেণি**, options is **বিকল্প** and redownload is **আবার ডাউনলোড**
+  (thanks to [@abdul-karim-mia](https://github.com/abdul-karim-mia))
 - ✅ Bangla: spelled the Bangla Academy way — a link is a **লিংক**, a category a **শ্রেণি**,
   "already" is **ইতোমধ্যে** and a plural takes **-গুলো**, as the style guide settles them
   (thanks to [@Seyamalam](https://github.com/Seyamalam))
