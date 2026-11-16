@@ -2697,7 +2697,14 @@ pub fn attach_crash_handler(reporter: std::sync::Arc<mdm_crash::client::Reporter
     match CrashHandler::attach(event) {
         Ok(h) => {
             #[cfg(target_os = "linux")]
-            h.set_ptracer(monitor);
+            {
+                h.set_ptracer(monitor);
+                // Its handler reads a signal's context inside the frame, even where the kernel's
+                // frame is smaller than the copy it makes (no XSAVE, #1239).
+                if !mdm_crash::unix::keep_handler_in_frame() {
+                    tracing::warn!("crash handler: its signals couldn't be routed in frame");
+                }
+            }
             CRASH_HANDLER.set(h).is_ok()
         }
         Err(e) => {

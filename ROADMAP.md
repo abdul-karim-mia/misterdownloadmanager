@@ -562,6 +562,9 @@ Bug fixes from the first days of 0.5.0, a Safari extension, and more file types.
 
 These ship in the next version.
 
+- ✅ Linux: a crash is reported on computers whose processor doesn't offer XSAVE (an older
+  processor, a virtual machine), where the crash handler faulted a second time and no report came
+  ([#1239](https://github.com/anefzaoui/misterdownloadmanager/issues/1239))
 - ✅ Screen readers in the main window: Tab goes round the toolbar, the Categories tree and the
   download list, and the screen reader says and follows the download, category or toolbar button
   the keys are on; the toolbar is a toolbar of named buttons; the lists in MDM's windows say their

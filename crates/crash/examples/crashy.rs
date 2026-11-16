@@ -1,6 +1,7 @@
-//! The end-to-end test's program (tests/e2e.rs): `crashy <freeze|panic|crash> <data dir>` starts
-//! its monitor (itself with `--crash-monitor`), attaches the crash handler as MDM does, and then
-//! freezes its main thread, panics, or crashes. The monitor writes the dump and the report
+//! The end-to-end test's program (tests/e2e.rs): `crashy <freeze|panic|crash|thread-crash> <data
+//! dir>` starts its monitor (itself with `--crash-monitor`), attaches the crash handler as MDM
+//! does, and then freezes its main thread, panics, or crashes (on a thread of its own with
+//! `thread-crash`). The monitor writes the dump and the report
 //! (`<data>/crashes/*.txt`) and exits when this process is gone. With `CRASHY_MONITOR_LATE_MS` set,
 //! the monitor listens that much later.
 //!
@@ -53,7 +54,10 @@ fn main() {
         .unwrap(),
     );
     #[cfg(target_os = "linux")]
-    handler.set_ptracer(reporter.monitor_pid());
+    {
+        handler.set_ptracer(reporter.monitor_pid());
+        assert!(mdm_crash::unix::keep_handler_in_frame());
+    }
     // The monitor answers on a thread of its own once the first half second has passed (#1073):
     // a crash before then has no one to dump it, as in the app. The tests are about the reports,
     // so they wait for the connection first (a slow CI runner can take seconds to start it).
@@ -106,6 +110,14 @@ fn main() {
                 simulate(&h);
             }));
             crashy_panics_here();
+        }
+        "thread-crash" => {
+            // A thread's alternate signal stack is crash-handler's own, mapped as the thread starts.
+            let _ = std::thread::Builder::new()
+                .name("crasher".into())
+                .spawn(crashy_crashes_here)
+                .unwrap()
+                .join();
         }
         _ => crashy_crashes_here(),
     }

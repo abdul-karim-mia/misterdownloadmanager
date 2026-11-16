@@ -13,6 +13,7 @@
 //! - `github`: the issue form and the search for one already filed.
 //! - `symbols`: the release's symbols, fetched on demand.
 //! - `logs`: the log MDM keeps in release builds too, and its last lines.
+//! - `unix`: Linux: crash-handler's signal handler kept inside the signal's frame (#1239).
 
 pub mod analyze;
 pub mod client;
@@ -23,6 +24,9 @@ pub mod monitor;
 pub mod protocol;
 pub mod report;
 pub mod symbols;
+// Linux only: on macOS crash-handler takes Mach exceptions, with no signal frame to read.
+#[cfg(target_os = "linux")]
+pub mod unix;
 
 pub use crash_handler;
 
