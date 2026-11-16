@@ -32,10 +32,6 @@ tracing-subscriber.workspace = true
 url.workspace = true
 zip = { version = "9.1.3", default-features = false, features = ["deflate"] }
 
-# The signal handler's system calls (src/unix.rs).
-[target.'cfg(target_os = "linux")'.dependencies]
-libc = "0.2.191"
-
 [features]
 # Function names from a program's own debug info (its .pdb, DWARF) when no .sym file covers it:
 # mdm-symbolicate, this crate's end-to-end test, and an app built with
