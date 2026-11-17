@@ -601,6 +601,11 @@ These ship in the next version.
 - ✅ The command line's add accepts `--cookie` (or `--cookies`) to send a Cookie header with the
   download request; `-` reads it from standard input instead of the command line (thanks to
   [@abdul-karim-mia](https://github.com/abdul-karim-mia))
+- ✅ The command line's get and resume accept `--cookie` (or `--cookies`), `--referer` (or
+  `--referrer`), and `--user-agent` (or `--ua`) to send custom request headers with the download;
+  `-` reads cookies from standard input instead of the command line, and resume accepts them
+  afresh without saving headers to the state file (thanks to
+  [@abdul-karim-mia](https://github.com/abdul-karim-mia))
 - ✅ The tests run in English whatever Windows' display language is: a Chinese, German or
   Arabic Windows ran 27 of `mdm-app`'s tests red on code CI's English runner passed, as the
   interface language followed the system in tests too
