@@ -2366,8 +2366,8 @@ mod tests {
     #[test]
     fn add_command_parses_private() {
         for flag in ["--private", "-p"] {
-            let cli = Cli::try_parse_from([NAME, "add", "https://example.test/file.zip", flag])
-                .unwrap();
+            let cli =
+                Cli::try_parse_from([NAME, "add", "https://example.test/file.zip", flag]).unwrap();
             assert!(matches!(
                 cli.cmd,
                 Cmd::Add {
