@@ -295,7 +295,7 @@ enum Cmd {
         #[arg(short = 's', long = "silent")]
         silent: bool,
         /// Private: do not save the download to the app's history or saved list.
-        #[arg(long = "private")]
+        #[arg(short = 'p', long = "private")]
         private: bool,
     },
     /// Start a download queue in the running app (automation API). Starts the main queue by default.
@@ -2365,16 +2365,18 @@ mod tests {
 
     #[test]
     fn add_command_parses_private() {
-        let cli = Cli::try_parse_from([NAME, "add", "https://example.test/file.zip", "--private"])
-            .unwrap();
-        assert!(matches!(
-            cli.cmd,
-            Cmd::Add {
-                ref url,
-                private: true,
-                ..
-            } if url == "https://example.test/file.zip"
-        ));
+        for flag in ["--private", "-p"] {
+            let cli = Cli::try_parse_from([NAME, "add", "https://example.test/file.zip", flag])
+                .unwrap();
+            assert!(matches!(
+                cli.cmd,
+                Cmd::Add {
+                    ref url,
+                    private: true,
+                    ..
+                } if url == "https://example.test/file.zip"
+            ));
+        }
 
         let cmd = add_command(
             "https://example.test/file.zip".into(),
