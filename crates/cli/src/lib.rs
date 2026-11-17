@@ -542,7 +542,7 @@ fn add_command_with(
     later: bool,
     silent: bool,
     private: bool,
-    mut stdin: impl Read,
+    stdin: impl Read,
 ) -> anyhow::Result<mdm_ipc::Command> {
     let dir = output.map(|p| {
         std::path::absolute(&p)
