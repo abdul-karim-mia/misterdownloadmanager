@@ -613,6 +613,9 @@ These ship in the next version.
   `-` reads cookies from standard input instead of the command line, and resume accepts them
   afresh without saving headers to the state file (thanks to
   [@abdul-karim-mia](https://github.com/abdul-karim-mia))
+- ✅ The command line's add accepts `--private` (or `-p`) to add downloads flagged as private, and
+  the MCP server's add_download tool accepts `private: true` (thanks to
+  [@abdul-karim-mia](https://github.com/abdul-karim-mia))
 - ✅ The tests run in English whatever Windows' display language is: a Chinese, German or
   Arabic Windows ran 27 of `mdm-app`'s tests red on code CI's English runner passed, as the
   interface language followed the system in tests too
