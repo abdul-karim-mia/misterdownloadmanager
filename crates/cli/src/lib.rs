@@ -294,6 +294,9 @@ enum Cmd {
         /// Silent: do not show the Download File Info dialog in the app.
         #[arg(short = 's', long = "silent")]
         silent: bool,
+        /// Private: do not save the download to the app's history or saved list.
+        #[arg(long = "private")]
+        private: bool,
     },
     /// Start a download queue in the running app (automation API). Starts the main queue by default.
     StartQueue {
@@ -492,6 +495,7 @@ fn add_command(
     cookie: Option<String>,
     later: bool,
     silent: bool,
+    private: bool,
 ) -> anyhow::Result<mdm_ipc::Command> {
     add_command_with(
         url,
@@ -505,6 +509,7 @@ fn add_command(
         cookie,
         later,
         silent,
+        private,
         std::io::stdin(),
     )
 }
@@ -536,7 +541,8 @@ fn add_command_with(
     cookie: Option<String>,
     later: bool,
     silent: bool,
-    stdin: impl Read,
+    private: bool,
+    mut stdin: impl Read,
 ) -> anyhow::Result<mdm_ipc::Command> {
     let dir = output.map(|p| {
         std::path::absolute(&p)
@@ -557,6 +563,7 @@ fn add_command_with(
         cookies,
         later,
         silent,
+        private,
         ..Default::default()
     })
 }
@@ -1440,9 +1447,10 @@ async fn run(cmd: Cmd, json: bool, accounts: Option<&dyn Accounts>) -> anyhow::R
             cookie,
             later,
             silent,
+            private,
         } => ask(add_command(
             url, output, name, category, queue, checksum, referer, user_agent, cookie, later,
-            silent,
+            silent, private,
         )?),
         Cmd::StartQueue { queue, name } => ask(mdm_ipc::Command {
             action: Some("start_queue".into()),
@@ -2111,6 +2119,7 @@ mod tests {
                 cookie: None,
                 later: false,
                 silent: false,
+                private: false,
             } if url == "https://example.test/a.zip"
         ));
 
@@ -2147,6 +2156,7 @@ mod tests {
                 cookie: None,
                 later: true,
                 silent: true,
+                private: false,
             } if url == "magnet:?xt=urn:btih:abc"
                 && o == &PathBuf::from("D:\\Downloads")
                 && n == "my_torrent"
@@ -2168,9 +2178,10 @@ mod tests {
                 cookie,
                 later,
                 silent,
+                private,
             } => add_command(
                 url, output, name, category, queue, checksum, referer, user_agent, cookie, later,
-                silent,
+                silent, private,
             )
             .unwrap(),
             _ => unreachable!(),
@@ -2299,12 +2310,14 @@ mod tests {
             None,
             false,
             false,
+            false,
         )
         .unwrap();
         assert_eq!(cmd.dir.as_deref(), Some(expected.as_str()));
         assert_eq!(cmd.referer.as_deref(), Some("https://example.test/source"));
         assert_eq!(cmd.user_agent, None);
         assert_eq!(cmd.cookies, None);
+        assert!(!cmd.private);
     }
 
     #[test]
@@ -2321,12 +2334,14 @@ mod tests {
             Some("-".into()),
             false,
             false,
+            false,
             std::io::Cursor::new("session=secret_token_123\r\n"),
         )
         .unwrap();
         assert_eq!(cmd.cookies.as_deref(), Some("session=secret_token_123"));
         // A script's add with cookies is not the browser's own hand-off.
         assert!(!cmd.browser_handoff);
+        assert!(!cmd.private);
 
         let empty = add_command_with(
             "https://example.test/a.zip".into(),
@@ -2340,10 +2355,43 @@ mod tests {
             Some("-".into()),
             false,
             false,
+            false,
             std::io::Cursor::new("   \r\n"),
         )
         .unwrap();
         assert_eq!(empty.cookies, None);
+        assert!(!empty.private);
+    }
+
+    #[test]
+    fn add_command_parses_private() {
+        let cli = Cli::try_parse_from([NAME, "add", "https://example.test/file.zip", "--private"])
+            .unwrap();
+        assert!(matches!(
+            cli.cmd,
+            Cmd::Add {
+                ref url,
+                private: true,
+                ..
+            } if url == "https://example.test/file.zip"
+        ));
+
+        let cmd = add_command(
+            "https://example.test/file.zip".into(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            false,
+            false,
+            true,
+        )
+        .unwrap();
+        assert!(cmd.private);
     }
 
     #[test]
