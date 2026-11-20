@@ -27,7 +27,13 @@ where
             if let Some(dir) = var(name) {
                 let p = PathBuf::from(dir);
                 candidates.push(p.join("7-Zip").join("7z.exe"));
-                candidates.push(p.join("PeaZip").join("res").join("bin").join("7z").join("7z.exe"));
+                candidates.push(
+                    p.join("PeaZip")
+                        .join("res")
+                        .join("bin")
+                        .join("7z")
+                        .join("7z.exe"),
+                );
                 candidates.push(p.join("NanaZip").join("NanaZip.exe"));
                 candidates.push(p.join("NanaZip").join("7z.exe"));
             }
@@ -35,7 +41,13 @@ where
         if let Some(local) = var("LOCALAPPDATA") {
             let p = PathBuf::from(local).join("Programs");
             candidates.push(p.join("7-Zip").join("7z.exe"));
-            candidates.push(p.join("PeaZip").join("res").join("bin").join("7z").join("7z.exe"));
+            candidates.push(
+                p.join("PeaZip")
+                    .join("res")
+                    .join("bin")
+                    .join("7z")
+                    .join("7z.exe"),
+            );
         }
     }
     let names: &[&str] = if cfg!(windows) {
