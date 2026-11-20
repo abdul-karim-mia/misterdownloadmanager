@@ -986,3 +986,26 @@ fn only_hatchzips_own_refusal_with_nothing_changed_falls_back() {
     assert_eq!(seen, 0);
     assert!(!t.path().join("two.txt").exists());
 }
+
+#[test]
+fn peazip_and_nanazip_detected_by_find_7zip() {
+    let t = tempfile::tempdir().unwrap();
+    let peazip_bin = t.path().join("PeaZip/res/bin/7z");
+    std::fs::create_dir_all(&peazip_bin).unwrap();
+    let peazip_7z = peazip_bin.join(if cfg!(windows) { "7z.exe" } else { "7z" });
+    std::fs::write(&peazip_7z, b"fake 7z").unwrap();
+
+    let found = crate::external::find_7zip_with(
+        |var| {
+            if var == "ProgramFiles" {
+                Some(t.path().as_os_str().to_os_string())
+            } else {
+                None
+            }
+        },
+        None,
+    );
+    if cfg!(windows) {
+        assert_eq!(found, Some(peazip_7z));
+    }
+}

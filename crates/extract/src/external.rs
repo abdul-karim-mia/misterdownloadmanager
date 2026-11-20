@@ -11,23 +11,39 @@ use std::process::{Command, Stdio};
 use crate::Error;
 use crate::safe::{self, Writer};
 
-/// 7-Zip's program: in its usual install folders on Windows, else `7zz`, `7z` or `7za` on the
-/// PATH (Linux and macOS packages name it so).
+/// 7-Zip or compatible 7z-based archiver binary: 7-Zip, PeaZip, NanaZip in standard install
+/// folders on Windows, or `7zz`, `7z` or `7za` on the PATH (Linux and macOS packages name it so).
 pub fn find_7zip() -> Option<PathBuf> {
+    find_7zip_with(|var| std::env::var_os(var), std::env::var_os("PATH"))
+}
+
+pub(crate) fn find_7zip_with<F>(var: F, path: Option<std::ffi::OsString>) -> Option<PathBuf>
+where
+    F: Fn(&str) -> Option<std::ffi::OsString>,
+{
     let mut candidates: Vec<PathBuf> = Vec::new();
     if cfg!(windows) {
-        for var in ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"] {
-            if let Some(dir) = std::env::var_os(var) {
-                candidates.push(PathBuf::from(dir).join("7-Zip").join("7z.exe"));
+        for name in ["ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"] {
+            if let Some(dir) = var(name) {
+                let p = PathBuf::from(dir);
+                candidates.push(p.join("7-Zip").join("7z.exe"));
+                candidates.push(p.join("PeaZip").join("res").join("bin").join("7z").join("7z.exe"));
+                candidates.push(p.join("NanaZip").join("NanaZip.exe"));
+                candidates.push(p.join("NanaZip").join("7z.exe"));
             }
+        }
+        if let Some(local) = var("LOCALAPPDATA") {
+            let p = PathBuf::from(local).join("Programs");
+            candidates.push(p.join("7-Zip").join("7z.exe"));
+            candidates.push(p.join("PeaZip").join("res").join("bin").join("7z").join("7z.exe"));
         }
     }
     let names: &[&str] = if cfg!(windows) {
-        &["7z.exe", "7za.exe"]
+        &["7z.exe", "7za.exe", "nanazip.exe"]
     } else {
         &["7zz", "7z", "7za"]
     };
-    if let Some(path) = std::env::var_os("PATH") {
+    if let Some(path) = path {
         for dir in std::env::split_paths(&path) {
             for n in names {
                 candidates.push(dir.join(n));
